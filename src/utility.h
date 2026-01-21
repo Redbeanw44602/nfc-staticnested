@@ -73,7 +73,6 @@ constexpr auto start_block_sequence(MifareCard type) {
     return ret;
 }
 
-
 } // namespace mifare
 
 } // namespace nfcpp

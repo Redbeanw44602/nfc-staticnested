@@ -6,11 +6,22 @@ add_requires('argparse v3.2')
 
 set_version('0.1.0')
 
+set_warnings('all', 'extra')
+set_languages('c++23')
+
 target('nfc-staticnested')
     set_kind('binary')
-    set_warnings('all', 'extra')
-    set_languages('c++23')
     add_includedirs('src', '../nfcpp/src')
     add_deps('nfcpp')
     add_packages('argparse')
-    add_files('src/**.cpp')
+    add_files(
+        'src/common/*.cpp',
+        'src/tools/nfc-staticnested/*.cpp'
+    )
+
+target('nfc-isen')
+    set_kind('binary')
+    add_includedirs('src', '../nfcpp/src')
+    add_files(
+        'src/tools/nfc-isen/*.cpp'
+    )

@@ -327,6 +327,7 @@ std::uint64_t MifareClassicInitiator::try_get_key_b(
     std::uint64_t ret{};
     std::memcpy(&ret, data.data() + data.size() - 6, 6);
 
+    // If KeyB is unreadable, then the value is 0
     return ret;
 }
 

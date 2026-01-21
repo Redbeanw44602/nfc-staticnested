@@ -178,12 +178,6 @@ std::optional<std::uint64_t> test_candidate_keys_worker(
         if (token.stop_requested()) break;
 
         auto key = candidate.get_lfsr();
-        if (progress.load(std::memory_order_relaxed) == 0) {
-            key = 0xA0B0C0D0E0F0;
-        }
-        if (progress.load(std::memory_order_relaxed) == 1) {
-            key = 0x9C3F334609BF;
-        }
         if (mf_initiator
                 .test_key(cipher, target_key_type, card, target_block, key)) {
             return key;

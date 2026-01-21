@@ -17,12 +17,14 @@ using namespace util;
 std::set<std::uint64_t> PwnHost::run() {
     discover_tag();
     prepare();
-    test_static_nonce();
-    while (!m_sectors_unknown_key_a.empty()) {
-        perform(*m_sectors_unknown_key_a.begin(), MifareKey::A);
-    }
-    while (!m_sectors_unknown_key_b.empty()) {
-        perform(*m_sectors_unknown_key_b.begin(), MifareKey::B);
+    if (!no_unknown_keys()) {
+        test_static_nonce();
+        while (!m_sectors_unknown_key_a.empty()) {
+            perform(*m_sectors_unknown_key_a.begin(), MifareKey::A);
+        }
+        while (!m_sectors_unknown_key_b.empty()) {
+            perform(*m_sectors_unknown_key_b.begin(), MifareKey::B);
+        }
     }
     return m_keychain;
 }
@@ -95,6 +97,8 @@ void PwnHost::prepare() {
         if (skey.key_b) m_keychain.emplace(*skey.key_b);
     }
 
+    if (no_unknown_keys()) return;
+
     // Attempt to read all unknown KeyBs (using KeyA).
     for (auto& skey : test_result) {
         if (skey.key_a) on_key_a_found(skey.sector, *skey.key_a);
@@ -127,7 +131,7 @@ void PwnHost::test_static_nonce() {
     if (std::ranges::adjacent_find(nt, std::ranges::not_equal_to{})
         != nt.end()) {
         throw std::runtime_error(
-            "This tag does not have a static nonce. Try mfoc?"
+            "This tag doesn't have a static nonce, try MFOC?"
         );
     }
 }

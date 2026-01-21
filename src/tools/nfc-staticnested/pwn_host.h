@@ -50,6 +50,11 @@ private:
     std::optional<std::uint64_t>
     try_read_key_b(std::uint64_t key_a, std::uint8_t sector);
 
+    bool no_unknown_keys() const {
+        return m_sectors_unknown_key_a.empty()
+            && m_sectors_unknown_key_b.empty();
+    }
+
 private:
     // Input
     mifare::MifareClassicInitiator m_initiator;

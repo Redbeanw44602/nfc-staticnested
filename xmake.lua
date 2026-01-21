@@ -6,6 +6,8 @@ add_requires('nfcpp', {configs = {crapto1 = true}})
 set_languages('c++23')
 set_warnings('all', 'extra')
 
+option('nfcpp-source', {description = 'Specify custom nfcpp source dir.'})
+
 target('nfc-staticnested')
     set_kind('binary')
     add_includedirs('src')
@@ -25,8 +27,12 @@ target('nfc-isen')
         'src/tools/nfc-isen/*.cpp'
     )
 
-package('nfcpp', function () 
-    set_sourcedir('/home/neko/Desktop/workspaces/local/nfcpp')
+package('nfcpp', function ()
+    if has_config('nfcpp-source') then
+        set_sourcedir(get_config('nfcpp-source'))
+    else
+        add_urls('https://github.com/Redbeanw44602/nfcpp.git')
+    end
     add_configs('crapto1', {description = 'Enable crapto1 feature.', default = false, type = 'boolean'})
     add_deps('libnfc')
     on_load(function (package) 

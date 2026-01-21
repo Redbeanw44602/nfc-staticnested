@@ -4,6 +4,7 @@
  * This file is part of the NFC++ open source project.
  */
 
+#include <fstream>
 #include <print>
 
 #include <argparse/argparse.hpp>
@@ -29,7 +30,7 @@ auto load_args(int argc, char* argv[]) {
         .implicit_value(true)
         .store_into(args.force_detect_distance)
         .help("Disable optimization for the Nt_1 = 0x009080A2 tag.");
-    program.add_argument("--dumpkeys")
+    program.add_argument("--dump-keys")
         .store_into(args.dump_keys)
         .help("Dump all valid keys to a text file.");
     program.add_argument("-d", "--dump")
@@ -92,6 +93,9 @@ int main(int argc, char* argv[]) CPPTRACE_TRY {
     NfcContext context;
 
     auto device = context.open_device();
+    if (!device) {
+        throw std::runtime_error("No device found.");
+    }
     std::println("NFC device opened: {}", device->get_name());
 
     auto initiator = device->as_initiator();
@@ -109,6 +113,24 @@ int main(int argc, char* argv[]) CPPTRACE_TRY {
     std::println("Key chain:");
     for (const auto key : keychain) {
         std::println("* {:012X}", key);
+    }
+
+    if (!args.dump_keys.empty()) {
+        std::ofstream ofs(args.dump_keys);
+        if (!ofs) {
+            throw std::runtime_error("Can't open file.");
+        }
+        for (const auto key : keychain) {
+            ofs << std::format("{:012X}\n", key);
+        }
+        std::println(
+            "The key dump file has been saved to {}.",
+            std::filesystem::absolute(args.dump_keys).string()
+        );
+    }
+
+    if (!args.dump.empty()) {
+        // TODO
     }
 
     return 0;

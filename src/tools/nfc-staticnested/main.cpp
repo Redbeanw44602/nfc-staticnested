@@ -7,6 +7,7 @@
 #include <print>
 
 #include <argparse/argparse.hpp>
+#include <cpptrace/from_current.hpp>
 #include <nfcpp/nfc.hpp>
 
 #include "pwn_host.h"
@@ -79,7 +80,7 @@ auto load_args(int argc, char* argv[]) {
     return args;
 }
 
-int main(int argc, char* argv[]) try {
+int main(int argc, char* argv[]) CPPTRACE_TRY {
     auto args = load_args(argc, argv);
 
     // Start libnfc lifecycle
@@ -106,7 +107,27 @@ int main(int argc, char* argv[]) try {
     }
 
     return 0;
-} catch (const std::runtime_error& e) {
+}
+CPPTRACE_CATCH(const NfcException& e) {
+    std::println("{}\n", e.what());
+    cpptrace::from_current_exception().print();
+    std::println("\n    [Note from the developer]\n");
+    std::println(
+        "Stacktrace generation doesn't necessarily mean there's a "
+        "bug in the software. More often, it's just a way to help "
+        "locate the problem. If you're sure there's a bug, please "
+        "open an issue on GitHub."
+    );
+    return 1;
+}
+catch (const std::runtime_error& e) {
+    // std::runtime_error is expected, so no stacktrace is provided.
     std::println("{}", e.what());
     return 1;
+}
+catch (...) {
+    // It is impossible to throw other exceptions;
+    // Otherwise, it would be a serious error and be handled by the operating
+    // system (generating a coredump).
+    throw;
 }

@@ -1,6 +1,7 @@
 add_rules('mode.debug', 'mode.release')
 
 add_requires('argparse v3.2')
+add_requires('cpptrace v1.0.4')
 add_requires('nfcpp', {configs = {crapto1 = true}})
 
 set_languages('c++23')
@@ -13,6 +14,7 @@ target('nfc-staticnested')
     add_includedirs('src')
     add_packages(
         'argparse',
+        'cpptrace',
         'nfcpp'
     )
     add_files(

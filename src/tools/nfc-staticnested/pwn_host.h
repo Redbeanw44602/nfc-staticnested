@@ -41,9 +41,12 @@ private:
 
     void perform(std::uint8_t target_sector, mifare::MifareKey target_key_type);
 
-    void test_key_sectors(std::uint64_t key);
+    void on_new_key(std::uint64_t key);
 
-    std::uint64_t try_read_key_b(std::uint64_t key_a, std::uint8_t sector);
+    void on_key_a_found(std::uint8_t sector, std::uint64_t key);
+
+    std::optional<std::uint64_t>
+    try_read_key_b(std::uint64_t key_a, std::uint8_t sector);
 
 private:
     // Input

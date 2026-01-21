@@ -78,9 +78,7 @@ void PwnHost::prepare() {
             | std::ranges::to<std::set>();
         if (m_sectors_unknown_key_a.empty()
             && m_sectors_unknown_key_b.empty()) {
-            throw std::runtime_error(
-                "It appears there are no sectors with unknown keys."
-            );
+            std::println("It appears there are no sectors with unknown keys.");
         }
     } else {
         if (*m_args.target_key_type == MifareKey::A) {
@@ -94,6 +92,11 @@ void PwnHost::prepare() {
     for (auto& skey : test_result) {
         if (skey.key_a) m_keychain.emplace(*skey.key_a);
         if (skey.key_b) m_keychain.emplace(*skey.key_b);
+    }
+
+    // Attempt to read all unknown KeyBs (using KeyA).
+    for (auto& skey : test_result) {
+        if (skey.key_a) on_key_a_found(skey.sector, *skey.key_a);
     }
 
     std::println(
@@ -128,6 +131,12 @@ void PwnHost::perform(std::uint8_t target_sector, MifareKey target_key_type) {
                             ? m_sectors_unknown_key_a
                             : m_sectors_unknown_key_b;
     wait_to_erase.erase(target_sector);
+    on_new_key(result.key);
+    if (target_key_type == MifareKey::A) {
+        on_key_a_found(target_sector, result.key);
+    }
+};
+
 std::optional<std::uint64_t>
 PwnHost::try_read_key_b(std::uint64_t key_a, std::uint8_t sector) {
     if (!m_initiator.select_card(m_card.uid)) {
@@ -164,7 +173,7 @@ PwnHost::try_read_key_b(std::uint64_t key_a, std::uint8_t sector) {
     }
 }
 
-void PwnHost::test_key_sectors(std::uint64_t key) {
+void PwnHost::on_new_key(std::uint64_t key) {
     MifareCrypto1Cipher cipher;
     auto impl = [&](std::set<std::uint8_t>& sectors, MifareKey key_type) {
         for (auto it = sectors.begin(); it != sectors.end();) {
@@ -180,6 +189,7 @@ void PwnHost::test_key_sectors(std::uint64_t key) {
                     key_type == MifareKey::A ? "A" : "B",
                     *it
                 );
+                m_keychain.emplace(key);
                 it = sectors.erase(it);
             } else {
                 it++;
@@ -188,6 +198,20 @@ void PwnHost::test_key_sectors(std::uint64_t key) {
     };
     impl(m_sectors_unknown_key_a, MifareKey::A);
     impl(m_sectors_unknown_key_b, MifareKey::B);
+}
+
+void PwnHost::on_key_a_found(std::uint8_t sector, std::uint64_t key) {
+    if (m_sectors_unknown_key_b.contains(sector)) {
+        if (auto key_b = try_read_key_b(key, sector)) {
+            std::println(
+                "KeyB in sector {} read successfully, is {:012X}. (using "
+                "KeyA).",
+                sector,
+                *key_b
+            );
+            on_new_key(*key_b);
+        }
+    }
 }
 
 } // namespace nfcpp

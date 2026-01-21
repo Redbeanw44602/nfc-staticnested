@@ -17,6 +17,7 @@ using namespace util;
 std::set<std::uint64_t> PwnHost::run() {
     discover_tag();
     prepare();
+    test_static_nonce();
     while (!m_sectors_unknown_key_a.empty()) {
         perform(*m_sectors_unknown_key_a.begin(), MifareKey::A);
     }
@@ -104,6 +105,31 @@ void PwnHost::prepare() {
         valid_key->key_a ? "A" : "B",
         valid_key->sector
     );
+}
+
+void PwnHost::test_static_nonce() {
+    std::array<uint32_t, 3> nt;
+    MifareCrypto1Cipher     cipher;
+    for (auto i : std::views::iota(0uz, nt.size())) {
+        if (!m_initiator.select_card(m_card.uid)) {
+            throw std::runtime_error("Tag moved out");
+        }
+        m_initiator.auth(
+            cipher,
+            m_valid_key.type,
+            m_card,
+            m_valid_key.block,
+            m_valid_key.key,
+            false,
+            nt[i]
+        );
+    }
+    if (std::ranges::adjacent_find(nt, std::ranges::not_equal_to{})
+        != nt.end()) {
+        throw std::runtime_error(
+            "This tag does not have a static nonce. Try mfoc?"
+        );
+    }
 }
 
 void PwnHost::perform(std::uint8_t target_sector, MifareKey target_key_type) {

@@ -39,6 +39,8 @@ private:
 
     void prepare();
 
+    void test_static_nonce();
+
     void perform(std::uint8_t target_sector, mifare::MifareKey target_key_type);
 
     void on_new_key(std::uint64_t key);

@@ -60,7 +60,9 @@ void PwnHost::prepare() {
             "attack."
         );
     }
-    m_valid_key = *valid_key;
+    m_valid_key.type = valid_key->key_a ? MifareKey::A : MifareKey::B;
+    m_valid_key.key  = valid_key->key_a ? *valid_key->key_a : *valid_key->key_b;
+    m_valid_key.block = sector_to_block(valid_key->sector);
 
     // Determine the sectors to be attacked
     if (!m_args.target_sector || !m_args.target_key_type) {
@@ -106,9 +108,9 @@ void PwnHost::perform(std::uint8_t target_sector, MifareKey target_key_type) {
     auto result = static_nested::execute(
         m_initiator,
         m_card,
-        sector_to_block(m_valid_key.sector),
-        m_valid_key.key_a ? MifareKey::A : MifareKey::B,
-        m_valid_key.key_a ? *m_valid_key.key_a : *m_valid_key.key_b,
+        m_valid_key.block,
+        m_valid_key.type,
+        m_valid_key.key,
         sector_to_block(target_sector),
         target_key_type,
         m_args.force_detect_distance

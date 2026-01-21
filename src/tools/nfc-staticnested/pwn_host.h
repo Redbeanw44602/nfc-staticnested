@@ -52,7 +52,11 @@ private:
     InputArguments const&          m_args;
 
     // Context
-    SectorKey               m_valid_key;
+    struct {
+        mifare::MifareKey type;
+        std::uint64_t     key;
+        std::uint8_t      block;
+    } m_valid_key;
     std::set<std::uint64_t> m_keychain;
     std::set<std::uint8_t>  m_sectors_unknown_key_a;
     std::set<std::uint8_t>  m_sectors_unknown_key_b;

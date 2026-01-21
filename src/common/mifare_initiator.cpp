@@ -4,8 +4,6 @@
  * This file is part of the NFC++ open source project.
  */
 
-#include <random>
-
 #include "common/mifare_initiator.h"
 
 #include "utility.h"
@@ -164,14 +162,8 @@ bool MifareClassicInitiator::auth(
         nonce->get() = nt;
     }
 
-    std::array<std::uint8_t, 4> nr;
+    std::array<std::uint8_t, 4> nr{};
     std::array<std::uint8_t, 4> ntt;
-
-    static std::mt19937 random(std::random_device{}());
-
-    for (auto i : std::views::iota(0, 4)) {
-        nr[i] = random();
-    }
 
     nt = prng_successor(nt, 32);
     for (auto i : std::views::iota(0, 4)) {

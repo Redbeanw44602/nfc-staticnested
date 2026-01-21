@@ -8,7 +8,7 @@
 
 #include <set>
 
-#include <nfc.hpp>
+#include <nfcpp/nfc.hpp>
 
 #include "common/mifare_initiator.h"
 #include "types.h"

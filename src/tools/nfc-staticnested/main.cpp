@@ -7,7 +7,7 @@
 #include <print>
 
 #include <argparse/argparse.hpp>
-#include <nfc.hpp>
+#include <nfcpp/nfc.hpp>
 
 #include "pwn_host.h"
 

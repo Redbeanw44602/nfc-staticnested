@@ -4,14 +4,15 @@
  * This file is part of the NFC++ open source project.
  */
 
-#include "common/static_nested.h"
-#include "utility.h"
-
-#include <nfc.hpp>
-
 #include <chrono>
 #include <future>
 #include <thread>
+
+#include <nfcpp/nfc.hpp>
+
+#include "common/static_nested.h"
+
+#include "utility.h"
 
 namespace nfcpp::static_nested {
 

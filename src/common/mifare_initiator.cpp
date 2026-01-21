@@ -4,10 +4,11 @@
  * This file is part of the NFC++ open source project.
  */
 
-#include "common/mifare_initiator.h"
-#include "utility.h"
-
 #include <random>
+
+#include "common/mifare_initiator.h"
+
+#include "utility.h"
 
 namespace nfcpp::mifare {
 

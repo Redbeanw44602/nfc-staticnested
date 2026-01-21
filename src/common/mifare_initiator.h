@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <nfc.hpp>
+#include <nfcpp/nfc.hpp>
 
 #include "types.h"
 

@@ -260,7 +260,8 @@ std::uint32_t MifareClassicInitiator::encrypted_nonce(
 std::vector<SectorKey> MifareClassicInitiator::test_default_keys(
     const ISO14443ACard&           card,
     MifareCard                     type,
-    std::span<const std::uint64_t> user_keys
+    std::span<const std::uint64_t> user_keys,
+    bool                           no_default_keys
 ) {
     std::vector<std::uint64_t> default_keys = {
         0xFFFFFFFFFFFF,
@@ -268,6 +269,7 @@ std::vector<SectorKey> MifareClassicInitiator::test_default_keys(
         0xD3F7D3F7D3F7,
         0x000000000000,
     };
+    if (no_default_keys) default_keys.clear();
     default_keys.append_range(user_keys);
 
     std::println("Testing {} default keys...", default_keys.size());

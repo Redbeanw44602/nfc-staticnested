@@ -35,6 +35,11 @@ auto load_args(int argc, char* argv[]) {
     program.add_argument("-d", "--dump")
         .store_into(args.dump)
         .help("Dump the full card into a binary file.");
+    program.add_argument("--no-default-keys")
+        .default_value(false)
+        .implicit_value(true)
+        .store_into(args.no_default_keys)
+        .help("Only test the keys specified by the user.");
     program.add_argument("-k", "--key")
         .append()
         .scan<'X', std::uint64_t>()

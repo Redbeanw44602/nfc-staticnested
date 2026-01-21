@@ -52,7 +52,8 @@ public:
     std::vector<SectorKey> test_default_keys(
         const ISO14443ACard&           card,
         MifareCard                     type,
-        std::span<const std::uint64_t> user_keys = {}
+        std::span<const std::uint64_t> user_keys       = {},
+        bool                           no_default_keys = false
     );
 
     std::uint64_t

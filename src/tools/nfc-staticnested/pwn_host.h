@@ -20,6 +20,7 @@ struct InputArguments {
     bool                             force_detect_distance;
     std::string                      dump_keys;
     std::string                      dump;
+    bool                             no_default_keys;
     std::vector<std::uint64_t>       user_keys;
     std::optional<std::uint8_t>      target_sector;
     std::optional<mifare::MifareKey> target_key_type;

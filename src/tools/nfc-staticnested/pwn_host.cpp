@@ -42,8 +42,12 @@ void PwnHost::discover_tag() {
 
 void PwnHost::prepare() {
     // Test default keys
-    const auto test_result =
-        m_initiator.test_default_keys(m_card, m_args.type, m_args.user_keys);
+    const auto test_result = m_initiator.test_default_keys(
+        m_card,
+        m_args.type,
+        m_args.user_keys,
+        m_args.no_default_keys
+    );
 
     // Try get one valid key
     auto valid_key =

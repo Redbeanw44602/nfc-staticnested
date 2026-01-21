@@ -128,35 +128,40 @@ void PwnHost::perform(std::uint8_t target_sector, MifareKey target_key_type) {
                             ? m_sectors_unknown_key_a
                             : m_sectors_unknown_key_b;
     wait_to_erase.erase(target_sector);
-    test_key_sectors(result.key);
-    if (target_key_type == MifareKey::A
-        && m_sectors_unknown_key_b.contains(target_sector)) {
-        auto key_b = try_read_key_b(result.key, target_sector);
-        std::println(
-            "KeyB read successfully, is {:012X}. (using KeyA).",
-            key_b
-        );
-        test_key_sectors(key_b);
-        m_keychain.emplace(key_b);
-    }
-    m_keychain.emplace(result.key);
-};
-
-std::uint64_t
+std::optional<std::uint64_t>
 PwnHost::try_read_key_b(std::uint64_t key_a, std::uint8_t sector) {
     if (!m_initiator.select_card(m_card.uid)) {
         throw std::runtime_error("Tag moved out.");
     }
-    MifareCrypto1Cipher cipher;
-    m_initiator.auth(
-        cipher,
-        MifareKey::A,
-        m_card,
-        sector_to_block(sector),
-        key_a,
-        false
-    );
-    return m_initiator.try_get_key_b(cipher, sector);
+
+    try {
+        auto                block = sector_to_block(sector);
+        MifareCrypto1Cipher cipher;
+
+        // Convert to key block (+15 if Classic4K)
+        if (block < 128) {
+            block += 3;
+        } else {
+            block += 15;
+        }
+
+        m_initiator.auth(cipher, MifareKey::A, m_card, block, key_a, false);
+
+        auto data = m_initiator.read(cipher, block);
+
+        std::uint64_t ret{};
+        std::memcpy(&ret, data.data() + data.size() - 6, 6);
+
+        // Verify the key.
+        if (!m_initiator.auth(cipher, MifareKey::B, m_card, block, ret, true)) {
+            return std::nullopt;
+        }
+
+        return ret;
+    } catch (const std::runtime_error& e) {
+        // CRC may fail, so catch runtime_error.
+        return std::nullopt;
+    }
 }
 
 void PwnHost::test_key_sectors(std::uint64_t key) {

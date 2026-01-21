@@ -56,9 +56,6 @@ public:
         bool                           no_default_keys = false
     );
 
-    std::uint64_t
-    try_get_key_b(mifare::MifareCrypto1Cipher& cipher, std::uint8_t sector);
-
 private:
     NfcDevice::Initiator& m_initiator;
     NfcPN53xFrameBuffer   m_buffer;

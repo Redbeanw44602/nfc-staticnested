@@ -195,12 +195,17 @@ std::vector<std::uint8_t> MifareClassicInitiator::read(
     mifare::MifareCrypto1Cipher& cipher,
     std::uint8_t                 block
 ) {
-    auto response = m_initiator.transceive_bits(
-        data_crc_parity(0x30, block)
-            .with_encrypt(cipher, [](auto&& cipher) { cipher.crypt(4); }),
-        m_buffer
-    );
-    if (response.check_crc<NfcCRC::ISO14443A>()) {
+    auto response = m_initiator
+                        .transceive_bits(
+                            data_crc_parity(0x30, block)
+                                .with_encrypt(
+                                    cipher,
+                                    [](auto&& cipher) { cipher.crypt(4); }
+                                ),
+                            m_buffer
+                        )
+                        .as_decrypted(cipher, false, false);
+    if (!response.check_crc<NfcCRC::ISO14443A>()) {
         throw std::runtime_error(
             "CRC check of the returned block data failed."
         );
@@ -296,33 +301,11 @@ std::vector<SectorKey> MifareClassicInitiator::test_default_keys(
         std::println(
             "{:02d}     {:<12} {:<12}",
             block_to_sector(block),
-            key_a ? std::format("{:12X}", *key_a) : "-",
-            key_b ? std::format("{:12X}", *key_b) : "-"
+            key_a ? std::format("{:012X}", *key_a) : "-",
+            key_b ? std::format("{:012X}", *key_b) : "-"
         );
     }
 
-    return ret;
-}
-
-std::uint64_t MifareClassicInitiator::try_get_key_b(
-    MifareCrypto1Cipher& cipher,
-    std::uint8_t         sector
-) {
-    auto block = sector_to_block(sector);
-
-    // Convert to key block (+15 if Classic4K)
-    if (block < 128) {
-        block += 3;
-    } else {
-        block += 15;
-    }
-
-    auto data = read(cipher, block);
-
-    std::uint64_t ret{};
-    std::memcpy(&ret, data.data() + data.size() - 6, 6);
-
-    // If KeyB is unreadable, then the value is 0
     return ret;
 }
 

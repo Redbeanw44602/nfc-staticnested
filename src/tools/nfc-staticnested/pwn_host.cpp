@@ -21,6 +21,7 @@ using namespace util;
 void PwnHost::run() {
     discover_tag();
     prepare();
+    check_fm11rf08s_backdoor();
     if (!no_unknown_keys()) {
         test_static_nonce();
         while (!m_sectors_unknown_key_a.empty()) {
@@ -133,12 +134,39 @@ void PwnHost::test_static_nonce() {
             nt[i]
         );
     }
-    if (std::ranges::adjacent_find(nt, std::ranges::not_equal_to{})
-        != nt.end()) {
+    if (std::ranges::adjacent_find(nt, std::ranges::not_equal_to{}) != nt.end()
+        && !check_fm11rf08s_backdoor()) {
         throw std::runtime_error(
-            "This tag doesn't have a static nonce, try MFOC?"
+            "This tag doesn't has static nonce, try mfoc?"
         );
     }
+}
+
+bool PwnHost::check_fm11rf08s_backdoor() {
+    if (!m_initiator.select_card(m_card.uid)) {
+        throw std::runtime_error("Tag moved out");
+    }
+    MifareCrypto1Cipher cipher;
+    std::uint32_t       nt{};
+    try {
+        m_initiator.auth(
+            cipher,
+            static_cast<MifareKey>(0x63),
+            m_card,
+            0,
+            0xFFFFFFFFFFFF,
+            false,
+            nt
+        );
+    } catch (const NfcException& e) {
+        if (e.error_code() != NfcError::RFTRANS) {
+            throw;
+        }
+    }
+    if (nt) {
+        std::println("This tag has fm11rf08s backdoor, try nfc-isen?");
+    }
+    return nt;
 }
 
 void PwnHost::perform(std::uint8_t target_sector, MifareKey target_key_type) {

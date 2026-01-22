@@ -6,15 +6,19 @@
 
 #include "pwn_host.h"
 
+#include "common/mifare_dumper.h"
 #include "common/static_nested.h"
 #include "utility.h"
+
+#include <filesystem>
+#include <fstream>
 
 namespace nfcpp {
 
 using namespace mifare;
 using namespace util;
 
-std::set<std::uint64_t> PwnHost::run() {
+void PwnHost::run() {
     discover_tag();
     prepare();
     if (!no_unknown_keys()) {
@@ -26,7 +30,8 @@ std::set<std::uint64_t> PwnHost::run() {
             perform(*m_sectors_unknown_key_b.begin(), MifareKey::B);
         }
     }
-    return m_keychain;
+    dump_keys();
+    dump();
 }
 
 void PwnHost::discover_tag() {
@@ -242,6 +247,51 @@ void PwnHost::on_key_a_found(std::uint8_t sector, std::uint64_t key) {
             on_new_key(*key_b);
         }
     }
+}
+
+void PwnHost::dump_keys() {
+    std::println("Key chain:");
+    for (const auto key : m_keychain) {
+        std::println("* {:012X}", key);
+    }
+
+    if (m_args.dump_keys.empty()) {
+        return;
+    }
+
+    std::ofstream ofs(m_args.dump_keys);
+    if (!ofs) {
+        throw std::runtime_error("Can't open file.");
+    }
+
+    for (const auto key : m_keychain) {
+        ofs << std::format("{:012X}\n", key);
+    }
+    std::println(
+        "The key file has been saved to {}.",
+        std::filesystem::absolute(m_args.dump_keys).string()
+    );
+}
+
+void PwnHost::dump() {
+    if (m_args.dump.empty()) {
+        return;
+    }
+
+    std::ofstream ofs(m_args.dump, std::ios::binary);
+    if (!ofs) {
+        throw std::runtime_error("Can't open file.");
+    }
+
+    auto keychain =
+        std::vector<std::uint64_t>(m_keychain.begin(), m_keychain.end());
+    auto dump =
+        MifareClassicDumper(m_initiator, m_card, m_args.type, keychain).dump();
+    ofs.write(reinterpret_cast<const char*>(dump.data()), dump.size());
+    std::println(
+        "The dump file has been saved to {}.",
+        std::filesystem::absolute(m_args.dump).string()
+    );
 }
 
 } // namespace nfcpp

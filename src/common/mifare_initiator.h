@@ -30,7 +30,7 @@ public:
         detail::OptionalRef<std::uint32_t> nonce = std::nullopt
     );
 
-    std::vector<std::uint8_t>
+    std::array<std::uint8_t, 16>
     read(mifare::MifareCrypto1Cipher& cipher, std::uint8_t block);
 
     bool hlta();

@@ -32,7 +32,7 @@ public:
     : m_initiator(initiator),
       m_args(args) {}
 
-    std::set<std::uint64_t> run();
+    void run();
 
 private:
     void discover_tag();
@@ -49,6 +49,10 @@ private:
 
     std::optional<std::uint64_t>
     try_read_key_b(std::uint64_t key_a, std::uint8_t sector);
+
+    void dump_keys();
+
+    void dump();
 
     bool no_unknown_keys() const {
         return m_sectors_unknown_key_a.empty()

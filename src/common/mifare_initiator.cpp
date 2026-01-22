@@ -182,8 +182,8 @@ bool MifareClassicInitiator::auth(
         m_buffer
     );
 
-    auto at = at_r.as_big_endian()
-                  .as_decrypted(cipher, false, false)
+    auto at = at_r.as_decrypted(cipher, false, false)
+                  .as_big_endian()
                   .expect<std::uint32_t>();
 
     nt = prng_successor(nt, 32);
@@ -191,7 +191,7 @@ bool MifareClassicInitiator::auth(
     return at == nt;
 }
 
-std::vector<std::uint8_t> MifareClassicInitiator::read(
+std::array<std::uint8_t, 16> MifareClassicInitiator::read(
     mifare::MifareCrypto1Cipher& cipher,
     std::uint8_t                 block
 ) {
@@ -210,7 +210,7 @@ std::vector<std::uint8_t> MifareClassicInitiator::read(
             "CRC check of the returned block data failed."
         );
     }
-    return std::ranges::to<std::vector>(response.get_bytes<16>());
+    return response.get_bytes<16>();
 }
 
 bool MifareClassicInitiator::hlta() {

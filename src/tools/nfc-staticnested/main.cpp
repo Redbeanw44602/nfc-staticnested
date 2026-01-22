@@ -50,6 +50,13 @@ auto load_args(int argc, char* argv[]) {
         .choices("a", "b")
         .help("Specify the target key type.");
 
+    program.add_description(
+        "Staticnested attack implemented in libnfc world. "
+    );
+    program.add_epilog(
+        "Bug report: https://github.com/Redbeanw44602/nfc-staticnested/issues"
+    );
+
     program.parse_args(argc, argv);
 
     auto type      = program.get<std::string>("-m");

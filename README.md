@@ -2,18 +2,18 @@
 
 This project ported the `hf mf staticnested` command from proxmark3 to the libnfc world.
 
-### Features
+## Features
 
 - Reimplemented using C++23 and [nfcpp](https://github.com/Redbeanw44602/nfcpp).
 - Good cross-platform compatibility.
 - Easy to use and works well.
 
-### Why port?
+## Why port?
 
 - For non-RFID specialists in developing countries, the proxmark3 might not be cost-effective.
 - Furthermore, PN532 can perform almost all tag-based attacks, so it's time to fill that gap.
 
-### Usage
+## Usage
 
 The default mode assumes the tag type is 1K and does not save anything, only print the keychain to stdout.
 
@@ -52,7 +52,7 @@ View the full help text.
 nfc-staticnested --help
 ```
 
-### Important Note ⚠
+## Important Note ⚠
 
 For tags with two identical NtEnc sets, we may need to test tens of thousands of keys, which could take hours. Please be mindful of heat dissipation when running the card reader for extended periods.
 
@@ -69,7 +69,7 @@ Testing keys... (123/71122) 5.00 keys/s, estimated time: 4 hr, 5 min, 6 sec. (wo
 
 Good luck! ... I once succeeded after testing with only 550/70,000 keys ;)
 
-### Please help me!
+## Seeking help
 
 I am not an RFID researcher, therefore I lack test samples or some hardwares. If you have any of the following, I would appreciate it if you could submit an issue to let me know if it is works or not.
 
@@ -80,11 +80,25 @@ I am not an RFID researcher, therefore I lack test samples or some hardwares. If
 
 I have tested it in the following environments:
 
-- PN532
-- Mifare Classic 1K
-- Two identical NtEncs
-- Archlinux
+- PN532 + Mifare Classic 1K + Two Identical NtEncs + Archlinux
 
-### LICENSE
+## Going further
+
+There are plans to continue implementing `nfc-isen` (for static encrypted nonce) and support the exploit of the [fm11rf08s backdoor](github.com/RfidResearchGroup/proxmark3/blob/master/client/pyscripts/fm11rf08s_recovery.py).
+
+If the tag contains a backdoor, `nfc-staticnested` will exit and print:
+
+```
+This tag has fm11rf08s backdoor, try nfc-isen?
+```
+
+Please give me a ⭐, thank you.
+
+## Credits
+
+- [Proxmark3](https://github.com/RfidResearchGroup/proxmark3)
+- [nfcpp](https://github.com/Redbeanw44602/nfcpp)
+
+## LICENSE
 
 GPLv3

@@ -1,6 +1,6 @@
 # nfc-staticnested
 
-This project ported the `hf mf staticnested` command from proxmark3 to the libnfc world.
+This project ports the `hf mf staticnested` command from proxmark3 to the libnfc world.
 
 ## Features
 
@@ -24,7 +24,7 @@ nfc-staticnested
 
 For `mini`/`2k`/`4k` tags, use -m to specify:
 
-> [!WARNING]
+> [!NOTE]
 > These tags may lack testing; please see below.
 
 ```bash
@@ -54,7 +54,11 @@ nfc-staticnested --help
 
 ## Important Note ⚠
 
-For tags with two identical NtEnc sets, we may need to test tens of thousands of keys, which could take hours. Please be mindful of heat dissipation when running the card reader for extended periods.
+For tags with two identical NtEnc sets, we may need to test tens of thousands of keys, which could take hours.
+
+> [!CAUTION]
+> **I am not responsible for any damage that may result.**  
+> Please be mindful of heat dissipation when running the card reader for extended periods.
 
 ```
 Using key A from sector 0 to exploit...
@@ -64,8 +68,6 @@ NtEnc_1 = 01200145 KeyStream_1 = AA1EFBC9
 Found 71122 candidate keys.
 Testing keys... (123/71122) 5.00 keys/s, estimated time: 4 hr, 5 min, 6 sec. (worst-case scenario)
 ```
-
-**I am not responsible for any damage that may result.**
 
 Good luck! ... I once succeeded after testing with only 550/70,000 keys ;)
 

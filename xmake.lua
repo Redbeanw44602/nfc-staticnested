@@ -8,6 +8,22 @@ set_languages('c++23')
 set_warnings('all', 'extra')
 
 option('nfcpp-source', {description = 'Specify custom nfcpp source dir.'})
+option('is-zigcc', {description = 'Enable workarounds for zigcc.'})
+
+if has_config('is-zigcc') then
+    add_requireconfs('**', {system = false})
+    add_requireconfs('nfcpp.libnfc.libusb-compat.libusb.eudev', {configs = {cxflags = '-fno-sanitize=undefined'}})
+end
+
+target('platform_workarounds')
+    set_kind('phony')
+    
+    if is_plat('mingw') then
+        add_syslinks('stdc++exp', {public = true})
+    end
+    if is_plat('macosx') then
+        add_rpathdirs('@executable_path', {public = true})
+    end
 
 target('nfc-staticnested')
     set_kind('binary')
@@ -21,6 +37,7 @@ target('nfc-staticnested')
         'src/common/*.cpp',
         'src/tools/nfc-staticnested/*.cpp'
     )
+    add_deps('platform_workarounds')
 
 target('nfc-isen')
     set_kind('binary')
@@ -28,6 +45,7 @@ target('nfc-isen')
     add_files(
         'src/tools/nfc-isen/*.cpp'
     )
+    add_deps('platform_workarounds')
 
 package('nfcpp', function ()
     if has_config('nfcpp-source') then

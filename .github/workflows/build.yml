@@ -1,0 +1,207 @@
+name: Build
+
+on:
+  push:
+    paths:
+      - .github/workflows/build.yml
+      - src/**
+      - xmake.lua
+  workflow_dispatch:
+
+env:
+  XMAKE_VERSION: "3.0.6"
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [debug, release]
+        plat:
+          - name: linux / x86_64
+            os: linux
+            toolchain: zig
+            arch: x86_64
+            runner: ubuntu-24.04
+            shell: bash {0}
+            extra-configure-flags: "--is-zigcc=true"
+          - name: linux / arm64
+            os: linux
+            toolchain: zig
+            arch: arm64
+            runner: ubuntu-24.04
+            shell: bash {0}
+            extra-configure-flags: "--is-zigcc=true --cross=aarch64-linux-gnu"
+          #          - name: linux / arm
+          #            os: linux
+          #            toolchain: zig
+          #            arch: armv7
+          #            runner: ubuntu-24.04
+          #            shell: bash {0}
+          #            extra-configure-flags: '--is-zigcc=true --cross=arm-linux-gnu'
+          - name: linux / riscv64
+            os: linux
+            toolchain: zig
+            arch: riscv64
+            runner: ubuntu-24.04
+            shell: bash {0}
+            extra-configure-flags: "--is-zigcc=true --cross=riscv64-linux-gnu"
+          - name: macosx / arm64
+            os: macosx
+            toolchain: clang
+            arch: arm64
+            runner: macos-15
+            shell: zsh {0}
+            extra-configure-flags: '--ldflags="-nostdlib++ -Wl,$(brew --prefix llvm)/lib/c++/libc++.a,$(brew --prefix llvm)/lib/c++/libc++abi.a"'
+          - name: macosx / x86_64
+            os: macosx
+            toolchain: clang
+            arch: x86_64
+            runner: macos-15-intel
+            shell: zsh {0}
+            extra-configure-flags: '--ldflags="-nostdlib++ -Wl,$(brew --prefix llvm)/lib/c++/libc++.a,$(brew --prefix llvm)/lib/c++/libc++abi.a"'
+          - name: windows / x86_64
+            os: mingw
+            toolchain: mingw
+            arch: x86_64
+            runner: windows-2025
+            shell: msys2 {0}
+            extra-configure-flags: ""
+            msys2-msystem: UCRT64
+            msys2-prefix: /ucrt64
+            msys2-toolchain: mingw-w64-ucrt-x86_64-toolchain
+          #          - name: windows / arm64
+          #            os: mingw
+          #            toolchain: mingw
+          #            arch: arm64
+          #            runner: windows-11-arm
+          #            shell: msys2 {0}
+          #            extra-configure-flags: ''
+          #            msys2-msystem: CLANGARM64
+          #            msys2-prefix: /clangarm64
+          #            msys2-toolchain: mingw-w64-clang-aarch64-toolchain
+          - name: windows / i386
+            os: mingw
+            toolchain: mingw
+            arch: i386
+            runner: windows-2025
+            shell: msys2 {0}
+            extra-configure-flags: ""
+            msys2-msystem: MINGW32
+            msys2-prefix: /mingw32
+            msys2-toolchain: mingw-w64-i686-toolchain
+    name: ${{ matrix.mode }} / ${{ matrix.plat.name }}
+    defaults:
+      run:
+        shell: ${{ matrix.plat.shell }}
+    runs-on: ${{ matrix.plat.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore xmake cache
+        if: runner.os != 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.xmake
+            ./.xmake-dest
+          key: xmake-${{ matrix.plat.os }}-${{ matrix.plat.arch }}-${{ hashFiles('xmake.lua') }}
+          restore-keys: |
+            xmake-${{ matrix.plat.os }}-${{ matrix.plat.arch }}-
+
+      - name: Restore xmake cache
+        if: runner.os == 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/AppData/Local/.xmake
+            ./.xmake-dest
+          key: xmake-${{ matrix.plat.os }}-${{ matrix.plat.arch }}-${{ hashFiles('xmake.lua') }}
+          restore-keys: |
+            xmake-${{ matrix.plat.os }}-${{ matrix.plat.arch }}-
+
+      - name: Setup msys2
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.plat.msys2-msystem }}
+          install: git ${{ matrix.plat.msys2-toolchain }}
+          update: true
+
+      - name: Setup xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: ${{ env.XMAKE_VERSION }}
+          actions-cache-folder: "./.xmake-dest"
+
+      - name: Setup clang
+        if: runner.os == 'macOS'
+        run: |
+          brew install llvm
+          echo "export PATH=\"$(brew --prefix llvm)/bin:\$PATH\"" >> ~/.zshenv
+
+      - name: Setup zig
+        if: runner.os == 'Linux'
+        uses: mlugg/setup-zig@v2
+        with:
+          version: master # We need LLVM 21+
+
+      - name: Fix PATH
+        if: runner.os == 'Windows'
+        run: |
+          echo "export PATH=\"$(pwd)/.xmake-dest:\$PATH\"" >> ~/.bash_profile
+
+      - name: Configure
+        run: |
+          echo $PATH
+          xmake f ${{ matrix.plat.extra-configure-flags }}  -a ${{ matrix.plat.arch }} -m ${{ matrix.mode }} -p ${{ matrix.plat.os }} --toolchain=${{ matrix.plat.toolchain }} -vD -y
+
+      - name: Build
+        run: |
+          xmake build -vD -y nfc-staticnested
+
+      - name: Copy runtime libraries
+        if: runner.os == 'Windows'
+        run: |
+          DEST='build/${{ matrix.plat.os }}/${{ matrix.plat.arch }}/${{ matrix.mode }}'
+
+          cp /c/Users/runneradmin/AppData/Local/.xmake/packages/l/libnfc/*/*/lib/libnfc.dll $DEST
+
+          cp ${{ matrix.plat.msys2-prefix }}/bin/libstdc++-6.dll $DEST || true
+          cp ${{ matrix.plat.msys2-prefix }}/bin/libwinpthread-1.dll $DEST || true
+          cp ${{ matrix.plat.msys2-prefix }}/bin/libgcc_s_seh-1.dll $DEST || true
+          cp ${{ matrix.plat.msys2-prefix }}/bin/libgcc_s_dw2-1.dll $DEST || true
+          cp ${{ matrix.plat.msys2-prefix }}/bin/zlib1.dll $DEST || true
+          cp ${{ matrix.plat.msys2-prefix }}/bin/libzstd.dll $DEST || true
+
+      - name: Copy runtime libraries
+        if: runner.os == 'macOS'
+        run: |
+          DEST='build/${{ matrix.plat.os }}/${{ matrix.plat.arch }}/${{ matrix.mode }}'
+
+          cp ~/.xmake/packages/l/libnfc/*/*/lib/libnfc.6.dylib $DEST
+
+      - name: Copy runtime libraries
+        if: runner.os == 'Linux'
+        run: |
+          DEST='build/${{ matrix.plat.os }}/${{ matrix.plat.arch }}/${{ matrix.mode }}'
+
+          cp ~/.xmake/packages/l/libnfc/*/*/lib/libnfc.so* $DEST
+
+      - name: Cleanup
+        run: |
+          xmake require --uninstall --extra='{configs={crapto1=true}}' nfcpp
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nfc-staticnested-${{ matrix.mode }}-${{ matrix.plat.os }}-${{ matrix.plat.arch }}-${{ github.sha }}
+          path: |
+            build/${{ matrix.plat.os }}/${{ matrix.plat.arch }}/${{ matrix.mode }}
+
+#      - name: Setup tmate session
+#        if: failure()
+#        uses: mxschmitt/action-tmate@v3
+#        with:
+#          limit-access-to-actor: true

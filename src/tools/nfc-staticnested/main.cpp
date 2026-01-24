@@ -121,13 +121,14 @@ int main(int argc, char* argv[]) CPPTRACE_TRY {
         if (connstrings.empty()) {
             throw std::runtime_error("No device found.");
         }
-        for (auto i : connstrings) {
-            std::println("* {}", i);
+        // TODO: Libc++ does not yet support C++23 std::views::enumerate
+        for (auto i : std::views::iota(0uz, connstrings.size())) {
+            std::println("{} {}", i == 0 ? "*" : "-", connstrings[i]);
         }
         args.connstring = connstrings[0];
         std::println(
-            "The first device has been selected. You can use --connstring "
-            "\"{}\" to avoid repeated scanning next time.",
+            "You can use '--connstring \"{}\"' or add it to libnfc.conf to "
+            "avoid duplicated scanning.",
             args.connstring
         );
         device = context.open_device(args.connstring);

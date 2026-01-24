@@ -9,6 +9,7 @@ set_warnings('all', 'extra')
 
 option('nfcpp-source', {description = 'Specify custom nfcpp source dir.'})
 option('is-zigcc', {description = 'Enable workarounds for zigcc.'})
+option('is-brewclang', {description = 'Enable workarounds for macosx.'})
 
 if has_config('is-zigcc') then
     add_requireconfs('**', {system = false})
@@ -23,6 +24,10 @@ target('platform_workarounds')
     end
     if is_plat('macosx') then
         add_rpathdirs('@executable_path', {public = true})
+    end
+    if has_config('is-brewclang') then
+        add_ldflags('-nostdlib++', {public = true})
+        add_ldflags('-Wl,$(shell brew --prefix llvm)/lib/c++/libc++.a,$(shell brew --prefix llvm)/lib/c++/libc++abi.a', {public = true})
     end
 
 target('nfc-staticnested')

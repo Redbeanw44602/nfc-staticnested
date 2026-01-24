@@ -103,9 +103,27 @@ int main(int argc, char* argv[]) CPPTRACE_TRY {
     NfcContext context;
 
     auto device = context.open_device(args.connstring);
-    if (!device) {
-        throw std::runtime_error("No device found.");
+    if (!device && args.connstring.empty()) {
+        std::println("Scanning device...");
+        auto connstrings = context.list_devices();
+        if (connstrings.empty()) {
+            throw std::runtime_error("No device found.");
+        }
+        for (auto i : connstrings) {
+            std::println("* {}", i);
+        }
+        args.connstring = connstrings[0];
+        std::println(
+            "The first device has been selected. You can use --connstring "
+            "\"{}\" to avoid repeated scanning next time.",
+            args.connstring
+        );
+        device = context.open_device(args.connstring);
     }
+    if (!device) {
+        throw std::runtime_error("Failed to open device!");
+    }
+
     std::println("NFC device opened: {}", device->get_name());
 
     auto initiator = device->as_initiator();

@@ -52,14 +52,14 @@ jobs:
             arch: arm64
             runner: macos-15
             shell: zsh {0}
-            extra-configure-flags: '--shflags="-nostdlib++ -Wl,$(brew --prefix llvm)/lib/c++/libc++.a,$(brew --prefix llvm)/lib/c++/libc++abi.a"'
+            extra-configure-flags: '--ldflags="-L$(brew --prefix llvm)/lib/c++ -L$(brew --prefix llvm)/lib/unwind -lunwind"'
           - name: macosx / x86_64
             os: macosx
             toolchain: clang
             arch: x86_64
             runner: macos-15-intel
             shell: zsh {0}
-            extra-configure-flags: '--shflags="-nostdlib++ -Wl,$(brew --prefix llvm)/lib/c++/libc++.a,$(brew --prefix llvm)/lib/c++/libc++abi.a"'
+            extra-configure-flags: '--ldflags="-L$(brew --prefix llvm)/lib/c++ -L$(brew --prefix llvm)/lib/unwind -lunwind"'
           - name: windows / x86_64
             os: mingw
             toolchain: mingw

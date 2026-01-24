@@ -12,6 +12,8 @@
 
 #include "pwn_host.h"
 
+#include "utility.h"
+
 using namespace nfcpp;
 using namespace nfcpp::mifare;
 
@@ -102,9 +104,19 @@ int main(int argc, char* argv[]) CPPTRACE_TRY {
     // Start libnfc lifecycle
     NfcContext context;
 
+    auto hack_ctx = reinterpret_cast<libhack::nfc_context*>(context.get());
+
+    // We do not want to scan for new devices in nfc_open.
+    hack_ctx->allow_autoscan = false;
+
     auto device = context.open_device(args.connstring);
     if (!device && args.connstring.empty()) {
         std::println("Scanning device...");
+
+        // Re-enable it.
+        hack_ctx->allow_autoscan       = true;
+        hack_ctx->allow_intrusive_scan = true;
+
         auto connstrings = context.list_devices();
         if (connstrings.empty()) {
             throw std::runtime_error("No device found.");

@@ -11,7 +11,6 @@ option('nfcpp-source', {description = 'Specify custom nfcpp source dir.'})
 option('is-zigcc', {description = 'Enable workarounds for zigcc.'})
 
 if has_config('is-zigcc') then
-    print('Has Config IS-ZIGCC')
     add_requireconfs('**', {system = false})
     add_requireconfs('nfcpp.libnfc.libusb-compat.libusb.eudev', {configs = {cxflags = '-fno-sanitize=undefined'}})
 end

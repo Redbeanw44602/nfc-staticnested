@@ -20,6 +20,10 @@ auto load_args(int argc, char* argv[]) {
 
     InputArguments args;
 
+    program.add_argument("-c", "--connstring")
+        .default_value("")
+        .store_into(args.connstring)
+        .help("Specify the device's connstring.");
     program.add_argument("-m", "--mifare-classic")
         .default_value("1k")
         .choices("mini", "1k", "2k", "4k")
@@ -98,7 +102,7 @@ int main(int argc, char* argv[]) CPPTRACE_TRY {
     // Start libnfc lifecycle
     NfcContext context;
 
-    auto device = context.open_device();
+    auto device = context.open_device(args.connstring);
     if (!device) {
         throw std::runtime_error("No device found.");
     }

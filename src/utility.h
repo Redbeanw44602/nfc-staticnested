@@ -9,7 +9,6 @@
 #include "types.h"
 
 #include <chrono>
-#include <ranges>
 
 namespace nfcpp {
 
@@ -49,24 +48,35 @@ constexpr std::uint8_t block_to_sector(std::uint8_t block) {
 }
 
 constexpr auto start_block_sequence(MifareCard type) {
+    // TODO: C++26 std::views::concat
+    // TODO: Libc++ does not yet support C++23 std::views::stride
     std::vector<std::uint8_t> ret;
     switch (type) {
     case MifareCard::ClassicMini: {
-        ret.append_range(std::views::iota(0, 20) | std::views::stride(4));
+        for (std::uint8_t i = 0; i < 20; i += 4) {
+            ret.emplace_back(i);
+        }
         break;
     }
     case MifareCard::Classic1K: {
-        ret.append_range(std::views::iota(0, 64) | std::views::stride(4));
+        for (std::uint8_t i = 0; i < 64; i += 4) {
+            ret.emplace_back(i);
+        }
         break;
     }
     case MifareCard::Classic2K: {
-        ret.append_range(std::views::iota(0, 128) | std::views::stride(4));
+        for (std::uint8_t i = 0; i < 128; i += 4) {
+            ret.emplace_back(i);
+        }
         break;
     }
     case MifareCard::Classic4K: {
-        // TODO: C++26 std::views::concat
-        ret.append_range(std::views::iota(0, 128) | std::views::stride(4));
-        ret.append_range(std::views::iota(128, 256) | std::views::stride(16));
+        for (std::uint8_t i = 0; i < 128; i += 4) {
+            ret.emplace_back(i);
+        }
+        for (int i = 128; i < 256; i += 16) {
+            ret.emplace_back(i);
+        }
         break;
     }
     }

@@ -253,12 +253,13 @@ StaticNestedResult execute(
         force_detect_distance
     );
 
-    for (auto [i, nt_enc] : std::views::enumerate(nt_encs)) {
+    // TODO: Libc++ does not yet support C++23 std::views::enumerate
+    for (auto i : std::views::iota(0uz, nt_encs.size())) {
         std::println(
             "NtEnc_{0} = {1:08X} KeyStream_{0} = {2:08X}",
             i,
-            nt_enc.nonce,
-            nt_enc.keystream
+            nt_encs[i].nonce,
+            nt_encs[i].keystream
         );
     }
 

@@ -133,8 +133,10 @@ void rollback_paired_states(
                 read_b++;
             }
         } else {
-            while (!ge_16b(*read_a, *read_b)) read_a++;
-            while (ge_16b(*read_a, *read_b)) read_b++;
+            while (read_a < states_a.end() && !ge_16b(*read_a, *read_b))
+                read_a++;
+            while (read_b < states_b.end() && ge_16b(*read_a, *read_b))
+                read_b++;
         }
     }
 

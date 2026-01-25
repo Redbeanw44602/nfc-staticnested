@@ -204,3 +204,41 @@ jobs:
 #        uses: mxschmitt/action-tmate@v3
 #        with:
 #          limit-access-to-actor: true
+
+  upload_to_dev:
+    name: Upload to release
+    if: github.ref == 'refs/heads/test'
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Delete all assets from release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: dev
+        run: |
+          set -e
+
+          echo "Fetching assets..."
+          ASSETS=$(gh release view "$RELEASE_TAG" --json assets -q '.assets[].name')
+
+          for asset in $ASSETS; do
+            echo "Deleting $asset"
+            gh release delete-asset "$RELEASE_TAG" "$asset" --yes
+          done
+
+      - name: Upload new assets to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: dev
+        run: |
+          gh release upload "$RELEASE_TAG" artifacts/* --clobber

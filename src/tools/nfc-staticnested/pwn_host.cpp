@@ -21,7 +21,6 @@ using namespace util;
 void PwnHost::run() {
     discover_tag();
     prepare();
-    check_fm11rf08s_backdoor();
     if (!no_unknown_keys()) {
         test_static_nonce();
         while (!m_sectors_unknown_key_a.empty()) {
@@ -134,10 +133,12 @@ void PwnHost::test_static_nonce() {
             nt[i]
         );
     }
-    if (std::ranges::adjacent_find(nt, std::ranges::not_equal_to{}) != nt.end()
-        && !check_fm11rf08s_backdoor()) {
+    if (std::ranges::adjacent_find(nt, std::ranges::not_equal_to{})
+        != nt.end()) {
         throw std::runtime_error(
-            "This tag doesn't has static nonce, try mfoc?"
+            check_fm11rf08s_backdoor()
+                ? "This tag has fm11rf08s backdoor, try nfc-isen?"
+                : "This tag doesn't has static nonce, try mfoc?"
         );
     }
 }
@@ -162,9 +163,6 @@ bool PwnHost::check_fm11rf08s_backdoor() {
         if (e.error_code() != NfcError::RFTRANS) {
             throw;
         }
-    }
-    if (nt) {
-        std::println("This tag has fm11rf08s backdoor, try nfc-isen?");
     }
     return nt;
 }

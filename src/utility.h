@@ -87,4 +87,24 @@ constexpr auto start_block_sequence(MifareCard type) {
 
 } // namespace mifare
 
+namespace libhack {
+
+typedef char nfc_connstring[1024];
+
+struct nfc_user_defined_device {
+    char           name[256];
+    nfc_connstring connstring;
+    bool           optional;
+};
+
+struct nfc_context {
+    bool                           allow_autoscan;
+    bool                           allow_intrusive_scan;
+    uint32_t                       log_level;
+    struct nfc_user_defined_device user_defined_devices[4];
+    unsigned int                   user_defined_device_count;
+};
+
+} // namespace libhack
+
 } // namespace nfcpp

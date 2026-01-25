@@ -12,6 +12,8 @@
 
 #include "pwn_host.h"
 
+#include "utility.h"
+
 using namespace nfcpp;
 using namespace nfcpp::mifare;
 
@@ -20,6 +22,10 @@ auto load_args(int argc, char* argv[]) {
 
     InputArguments args;
 
+    program.add_argument("-c", "--connstring")
+        .default_value("")
+        .store_into(args.connstring)
+        .help("Specify the device's connstring.");
     program.add_argument("-m", "--mifare-classic")
         .default_value("auto")
         .choices("auto", "mini", "1k", "2k", "4k")
@@ -98,10 +104,39 @@ int main(int argc, char* argv[]) CPPTRACE_TRY {
     // Start libnfc lifecycle
     NfcContext context;
 
-    auto device = context.open_device();
-    if (!device) {
-        throw std::runtime_error("No device found.");
+    auto hack_ctx = reinterpret_cast<libhack::nfc_context*>(context.get());
+
+    // We do not want to scan for new devices in nfc_open.
+    hack_ctx->allow_autoscan = false;
+
+    auto device = context.open_device(args.connstring);
+    if (!device && args.connstring.empty()) {
+        std::println("Scanning device...");
+
+        // Re-enable it.
+        hack_ctx->allow_autoscan       = true;
+        hack_ctx->allow_intrusive_scan = true;
+
+        auto connstrings = context.list_devices();
+        if (connstrings.empty()) {
+            throw std::runtime_error("No device found.");
+        }
+        // TODO: Libc++ does not yet support C++23 std::views::enumerate
+        for (auto i : std::views::iota(0uz, connstrings.size())) {
+            std::println("{} {}", i == 0 ? "*" : "-", connstrings[i]);
+        }
+        args.connstring = connstrings[0];
+        std::println(
+            "You can use '--connstring \"{}\"' or add it to libnfc.conf to "
+            "avoid duplicated scanning.",
+            args.connstring
+        );
+        device = context.open_device(args.connstring);
     }
+    if (!device) {
+        throw std::runtime_error("Failed to open device!");
+    }
+
     std::println("NFC device opened: {}", device->get_name());
 
     auto initiator = device->as_initiator();

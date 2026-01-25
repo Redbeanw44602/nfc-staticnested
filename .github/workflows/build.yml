@@ -154,6 +154,7 @@ jobs:
 
       - name: Configure
         run: |
+          xmake lua private.xrepo clean
           xmake f ${{ matrix.plat.extra-configure-flags }} -a ${{ matrix.plat.arch }} -m ${{ matrix.mode }} -p ${{ matrix.plat.os }} --toolchain=${{ matrix.plat.toolchain }} -vD -y
 
       - name: Build

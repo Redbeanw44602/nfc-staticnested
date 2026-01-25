@@ -16,6 +16,7 @@
 namespace nfcpp {
 
 struct InputArguments {
+    std::string                      connstring;
     mifare::MifareCard               type;
     bool                             force_detect_distance;
     std::string                      dump_keys;

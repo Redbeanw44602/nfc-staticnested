@@ -207,7 +207,7 @@ jobs:
 
   upload:
     name: Upload to release
-    if: github.ref == 'refs/heads/test'
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
 

@@ -205,7 +205,7 @@ jobs:
 #        with:
 #          limit-access-to-actor: true
 
-  upload_to_dev:
+  upload:
     name: Upload to release
     if: github.ref == 'refs/heads/test'
     needs: build
@@ -253,5 +253,5 @@ jobs:
 
       - name: Upload new assets to release
         run: |
-          gh release edit "$RELEASE_TAG" --notes "snapshot https://github.com/Redbeanw44602/nfc-staticnested/commit/$GITHUB_SHA at `$(date -u +"%Y-%m-%d %H:%M:%S UTC")`"
+          gh release edit "$RELEASE_TAG" --notes "snapshot https://github.com/Redbeanw44602/nfc-staticnested/commit/$GITHUB_SHA at \`$(date -u +"%Y-%m-%d %H:%M:%S UTC")\`"
           gh release upload "$RELEASE_TAG" artifacts/* --clobber

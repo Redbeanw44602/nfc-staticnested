@@ -195,7 +195,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nfc-staticnested-${{ matrix.mode }}-${{ matrix.plat.os }}-${{ matrix.plat.arch }}-${{ github.sha }}
+          name: nfc-staticnested-${{ matrix.mode }}-${{ matrix.plat.os }}-${{ matrix.plat.arch }}
           path: |
             build/${{ matrix.plat.os }}/${{ matrix.plat.arch }}/${{ matrix.mode }}
 
@@ -204,3 +204,54 @@ jobs:
 #        uses: mxschmitt/action-tmate@v3
 #        with:
 #          limit-access-to-actor: true
+
+  upload:
+    name: Upload to release
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RELEASE_TAG: dev
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Delete all assets from release
+        run: |
+          set -e
+
+          ASSETS=$(gh release view "$RELEASE_TAG" --json assets -q '.assets[].name')
+
+          for asset in $ASSETS; do
+            gh release delete-asset "$RELEASE_TAG" "$asset" --yes
+          done
+
+      - name: Compress all artifacts
+        run: |
+          set -e
+
+          cd artifacts
+          
+          for d in */; do
+            name="${d%/}"
+            echo "Compressing $name -> $name.zip"
+          
+            zip -r "${name}.zip" "$name"
+            rm -rf "$name"
+          done
+
+      - name: Upload new assets to release
+        run: |
+          gh release edit "$RELEASE_TAG" --notes "snapshot https://github.com/Redbeanw44602/nfc-staticnested/commit/$GITHUB_SHA at \`$(date -u +"%Y-%m-%d %H:%M:%S UTC")\`"
+          gh release upload "$RELEASE_TAG" artifacts/* --clobber

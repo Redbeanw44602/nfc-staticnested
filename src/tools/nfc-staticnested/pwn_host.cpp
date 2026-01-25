@@ -185,7 +185,9 @@ bool PwnHost::check_fm11rf08s_backdoor() {
             nt
         );
     } catch (const NfcException& e) {
-        if (e.error_code() != NfcError::RFTRANS) {
+        if (e.error_code() != NfcError::RFTRANS
+            // Some tag may NACK.
+            && e.error_code() != NfcError::INVARG) {
             throw;
         }
     }

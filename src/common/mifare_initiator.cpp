@@ -255,7 +255,9 @@ bool MifareClassicInitiator::test_key(
             return true;
         }
     } catch (const NfcException& e) {
-        if (e.error_code() != NfcError::RFTRANS) {
+        if (e.error_code() != NfcError::RFTRANS
+            // Some tag may NACK.
+            && e.error_code() != NfcError::INVARG) {
             throw;
         }
     }

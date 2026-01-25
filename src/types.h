@@ -22,6 +22,7 @@ enum class MifareKey {
 };
 
 enum class MifareCard {
+    NotSpecified,
     ClassicMini,
     Classic1K,
     Classic2K,

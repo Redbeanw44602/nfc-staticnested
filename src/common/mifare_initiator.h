@@ -35,6 +35,8 @@ public:
 
     bool hlta();
 
+    bool try_rats();
+
     bool test_key(
         mifare::MifareCrypto1Cipher& cipher,
         mifare::MifareKey            key_type,

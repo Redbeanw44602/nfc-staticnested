@@ -225,6 +225,21 @@ bool MifareClassicInitiator::hlta() {
     }
 }
 
+bool MifareClassicInitiator::try_rats() {
+    try {
+        auto ats =
+            m_initiator.transceive_bits(data_crc_parity(0xE0, 0x50), m_buffer);
+        if (ats.size_in_byte() > 3 && ats.check_crc<NfcCRC::ISO14443A>()) {
+            return true;
+        }
+    } catch (const NfcException& e) {
+        if (e.error_code() != NfcError::RFTRANS) {
+            throw;
+        }
+    }
+    return false;
+}
+
 bool MifareClassicInitiator::test_key(
     mifare::MifareCrypto1Cipher& cipher,
     mifare::MifareKey            key_type,

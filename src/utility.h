@@ -79,6 +79,8 @@ constexpr auto start_block_sequence(MifareCard type) {
         }
         break;
     }
+    default:
+        throw std::invalid_argument("Unreachable.");
     }
     return ret;
 }

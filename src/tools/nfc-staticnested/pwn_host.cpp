@@ -45,6 +45,31 @@ void PwnHost::discover_tag() {
     std::println("    UID  : {}", hex(std::byteswap(card->nuid)));
     std::println("    SAK  : {}", hex(card->sak));
 
+    if (m_args.type == MifareCard::NotSpecified) {
+        auto& type = const_cast<InputArguments&>(m_args).type;
+        switch (card->sak) {
+        case 0x09:
+            std::println("Auto detected: Mifare Classic Mini");
+            type = MifareCard::ClassicMini;
+            break;
+        case 0x08:
+            if (m_initiator.try_rats()) {
+                std::println("Auto detected: Mifare Classic 2K");
+                type = MifareCard::Classic2K;
+            } else {
+                std::println("Auto detected: Mifare Classic 1K");
+                type = MifareCard::Classic1K;
+            }
+            break;
+        case 0x18:
+            std::println("Auto detected: Mifare Classic 4K");
+            type = MifareCard::Classic4K;
+            break;
+        default:
+            throw std::runtime_error("Only support Mifare Classic tag.");
+        }
+    }
+
     m_card = *card;
 }
 

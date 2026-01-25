@@ -21,8 +21,8 @@ auto load_args(int argc, char* argv[]) {
     InputArguments args;
 
     program.add_argument("-m", "--mifare-classic")
-        .default_value("1k")
-        .choices("mini", "1k", "2k", "4k")
+        .default_value("auto")
+        .choices("auto", "mini", "1k", "2k", "4k")
         .help("Specify the card type so that we know the sector structure.");
     program.add_argument("--force-detect-distance")
         .default_value(false)
@@ -64,7 +64,7 @@ auto load_args(int argc, char* argv[]) {
                    : type == "1k"   ? MifareCard::Classic1K
                    : type == "2k"   ? MifareCard::Classic2K
                    : type == "4k"   ? MifareCard::Classic4K
-                                    : MifareCard::Classic1K;
+                                    : MifareCard::NotSpecified;
     args.user_keys = program.get<std::vector<std::uint64_t>>("-k");
     if (program.is_used("--target-sector")) {
         args.target_sector = program.get<std::uint8_t>("--target-sector");

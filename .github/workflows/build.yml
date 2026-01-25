@@ -238,10 +238,21 @@ jobs:
             gh release delete-asset "$RELEASE_TAG" "$asset" --yes
           done
 
+      - name: Compress all artifacts
+        run: |
+          cd artifacts
+          
+          for d in */; do
+            name="${d%/}"
+            echo "Compressing $name -> $name.zip"
+          
+            zip -r "${name}.zip" "$name"
+            rm -rf "$name"
+          done
+
       - name: Upload new assets to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: dev
         run: |
-          find artifacts
           gh release upload "$RELEASE_TAG" artifacts/* --clobber

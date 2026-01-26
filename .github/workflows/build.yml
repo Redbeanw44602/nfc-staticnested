@@ -10,6 +10,7 @@ on:
 
 env:
   XMAKE_VERSION: '3.0.6'
+  LIBNFC_SO_VERSION: '6'
 
 jobs:
   build:
@@ -180,14 +181,14 @@ jobs:
         run: |
           DEST='build/${{ matrix.plat.os }}/${{ matrix.plat.arch }}/${{ matrix.mode }}'
 
-          cp ~/.xmake/packages/l/libnfc/*/*/lib/libnfc.6.dylib $DEST
+          cp ~/.xmake/packages/l/libnfc/*/*/lib/libnfc.${{ env.LIBNFC_SO_VERSION }}.dylib $DEST
 
       - name: Copy runtime libraries
         if: runner.os == 'Linux'
         run: |
           DEST='build/${{ matrix.plat.os }}/${{ matrix.plat.arch }}/${{ matrix.mode }}'
 
-          cp ~/.xmake/packages/l/libnfc/*/*/lib/libnfc.so* $DEST
+          cp ~/.xmake/packages/l/libnfc/*/*/lib/libnfc.so.${{ env.LIBNFC_SO_VERSION }} $DEST
 
       - name: Cleanup
         run: |

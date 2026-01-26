@@ -1,4 +1,4 @@
-add_rules('mode.debug', 'mode.release')
+add_rules('mode.debug', 'mode.release', 'mode.releasedbg')
 
 add_requires('argparse v3.2')
 add_requires('cpptrace v1.0.4')
@@ -18,7 +18,7 @@ end
 
 target('platform_workarounds')
     set_kind('phony')
-    
+
     if is_plat('mingw') then
         add_syslinks('stdc++exp', {public = true})
     end

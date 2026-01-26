@@ -54,28 +54,28 @@ constexpr auto start_block_sequence(MifareCard type) {
     switch (type) {
     case MifareCard::ClassicMini: {
         for (std::uint8_t i = 0; i < 20; i += 4) {
-            ret.emplace_back(i);
+            ret.push_back(i);
         }
         break;
     }
     case MifareCard::Classic1K: {
         for (std::uint8_t i = 0; i < 64; i += 4) {
-            ret.emplace_back(i);
+            ret.push_back(i);
         }
         break;
     }
     case MifareCard::Classic2K: {
         for (std::uint8_t i = 0; i < 128; i += 4) {
-            ret.emplace_back(i);
+            ret.push_back(i);
         }
         break;
     }
     case MifareCard::Classic4K: {
         for (std::uint8_t i = 0; i < 128; i += 4) {
-            ret.emplace_back(i);
+            ret.push_back(i);
         }
         for (int i = 128; i < 256; i += 16) {
-            ret.emplace_back(i);
+            ret.push_back(i);
         }
         break;
     }

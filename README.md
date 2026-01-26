@@ -54,22 +54,31 @@ nfc-staticnested --help
 
 ## Important Note ⚠
 
-For tags with two identical NtEnc sets, we may need to test tens of thousands of keys, which could take hours.
+For tags with two identical NtEncs, we may need to test tens of thousands of keys, which could take hours.
 
 > [!CAUTION]
 > **I am not responsible for any damage that may result.**  
 > Please be mindful of heat dissipation when running the card reader for extended periods.
 
 ```
-Using key A from sector 0 to exploit...
 Attacking sector 1...
-NtEnc_0 = 01200145 KeyStream_0 = AA1EFBC9
-NtEnc_1 = 01200145 KeyStream_1 = AA1EFBC9
-Found 71122 candidate keys.
-Testing keys... (123/71122) 5.00 keys/s, estimated time: 4 hr, 5 min, 6 sec. (worst-case scenario)
+NtEnc_0 = 01200145 KeyStream_0 = DB7EFDC7
+NtEnc_1 = 01200145 KeyStream_1 = DB7EFDC7
+Found 73934 candidate keys.
+Testing keys... (252/73934) 4.85 keys/s, estimated time: 4 hr, 13 min, 24 sec. (worst-case scenario)
 ```
 
-Good luck! ... I once succeeded after testing with only 550/70,000 keys ;)
+If two different NtEncs can be obtained, a large number of candidate keys will be filtered out, and the attack time will be greatly reduced.
+
+```
+Attacking sector 0...
+NtEnc_0 = 8EEF8F86 KeyStream_0 = EE5E3073
+NtEnc_1 = 422B624D KeyStream_1 = 5CD5B759
+Found 1 candidate keys.
+KeyA found, is D0A758222680. (1 keys tested)
+```
+
+So, good luck! ;)
 
 ## Seeking help
 
@@ -77,7 +86,6 @@ I am not an RFID researcher, therefore I lack test samples or some hardwares. If
 
 - Can it work on the ACR122U?
 - Can it work on Mifare Classic Mini/2K/4K?
-- Can it work on tag that can get two sets of NtEnc? (Significantly reducing attack time?)
 - Can it work on MacOSX?
 
 I have tested it in the following environments:

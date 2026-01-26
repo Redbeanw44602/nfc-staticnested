@@ -115,6 +115,10 @@ void rollback_paired_states(
     auto ge_16b = [](const auto& a, const auto& b) {
         return crypto1_get_16bits(a) > crypto1_get_16bits(b);
     };
+    auto le_16b = [](const auto& a, const auto& b) {
+        return crypto1_get_16bits(a) < crypto1_get_16bits(b);
+    };
+
 
     while (read_a < states_a.end() && read_b < states_b.end()) {
         if (eq_16b(*read_a, *read_b)) {
@@ -133,9 +137,9 @@ void rollback_paired_states(
                 read_b++;
             }
         } else {
-            while (read_a < states_a.end() && !ge_16b(*read_a, *read_b))
+            while (read_a < states_a.end() && ge_16b(*read_a, *read_b))
                 read_a++;
-            while (read_b < states_b.end() && ge_16b(*read_a, *read_b))
+            while (read_b < states_b.end() && le_16b(*read_a, *read_b))
                 read_b++;
         }
     }
@@ -325,7 +329,7 @@ StaticNestedResult execute(
         attack_result.has_value(),
         attack_result ? *attack_result : 0,
         duration_cast<seconds>(end_time - start_time),
-        progress
+        progress + 1
     };
 }
 

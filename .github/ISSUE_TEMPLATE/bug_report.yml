@@ -1,0 +1,68 @@
+name: Bug report
+description: Create a report to help us improve
+labels: ['type: bug', 'status: need review']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting the issue to us!
+        
+        > [!IMPORTANT]
+        > **Issues are only accepted in English.**  
+        > [CHS] 问题报告需要用英语书写, 若您不会英语, 请借助翻译工具。  
+        
+        > [!WARNING]
+        > **Issues that do not conform to the format may be closed directly.**
+        > [CHS] 请按格式填写表单, 否则问题可能直接被关闭。
+
+  - type: dropdown
+    id: card-reader-model
+    attributes:
+      label: Card reader model
+      description: What kind of card reader are you using?
+      multiple: false
+      options:
+        - PN532
+        - ACR122U
+        - Other (Please specify?)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of software are you using? (or snapshot ID)
+      placeholder: e.g. v0.1.0 / snapshot-8a438dd
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Please describe your problem and tell us what you would like us to do.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: What does the log say?
+      description: Please paste the software''s runtime log.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce this?
+      description: Describe how to reproduce the problem as clearly and in as much detail as possible.
+      placeholder: |
+        1. Do what?
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        **You can add more details in the comments.**
+        ******
+        Thanks again for your contributions to the NFC++ project!

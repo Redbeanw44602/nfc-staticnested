@@ -1,0 +1,27 @@
+name: Feature request
+description: Suggest an idea for this project 
+labels: ["type: enhancement"]
+body:
+- type: markdown
+  attributes:
+    value: |
+      Thank you for your ideas!
+
+        > [!IMPORTANT]
+        > **Issues are only accepted in English.**  
+        > [CHS] 问题报告需要用英语书写, 若您不会英语, 请借助翻译工具。  
+
+- type: textarea
+  id: problem
+  attributes:
+    label: What problem did you encounter?
+    description: Please briefly describe the problem you encountered.
+- type: textarea
+  id: solution
+  attributes:
+    label: What do you think is still missing?
+    description: Please describe your proposed solution.
+- type: markdown
+  attributes:
+    value: |
+      Thanks again for your contributions to the NFC++ project!

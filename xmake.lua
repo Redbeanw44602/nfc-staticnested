@@ -10,22 +10,34 @@ set_warnings('all', 'extra')
 option('nfcpp-source', {description = 'Specify custom nfcpp source dir.'})
 option('is-zigcc', {description = 'Enable workarounds for zigcc.'})
 option('is-brewclang', {description = 'Enable workarounds for macosx.'})
+option('is-arch', {description = 'Enable workarounds for archlinux.'})
 
 if has_config('is-zigcc') then
+    -- zig will not look for packages from the host.
     add_requireconfs('**', {system = false})
+    -- eudev always enables ubsan (reason unknown).
     add_requireconfs('nfcpp.libnfc.libusb-compat.libusb.eudev', {configs = {cxflags = '-fno-sanitize=undefined'}})
+end
+
+if has_config('is-arch') then
+    -- archlinux uses meson to package libdwarf, and it's missing libdwarfConfig.cmake.
+    add_requireconfs('cpptrace.libdwarf', {system = false})
+    set_strip('none')
 end
 
 target('platform_workarounds')
     set_kind('phony')
 
     if is_plat('mingw') then
+        -- cf https://stackoverflow.com/questions/78452682/stdprintln-print-not-working-in-winlibs-mingw-gcc-14-1
         add_syslinks('stdc++exp', {public = true})
     end
     if is_plat('macosx') then
+        -- macosx release will include the runtime library (libnfc).
         add_rpathdirs('@executable_path', {public = true})
     end
     if has_config('is-brewclang') then
+        -- appleclang (worst compiler) is mostly incompatible with C++23, so we had to use brewclang and statically link libc++.
         add_ldflags('-nostdlib++', {public = true})
         add_ldflags('-Wl,$(shell brew --prefix llvm)/lib/c++/libc++.a,$(shell brew --prefix llvm)/lib/c++/libc++abi.a', {public = true})
     end

@@ -13,6 +13,43 @@ This project ports the `hf mf staticnested` command from proxmark3 to the libnfc
 - For non-RFID specialists in developing countries, the proxmark3 might not be cost-effective.
 - Furthermore, PN532 can perform almost all tag-based attacks, so it's time to fill that gap.
 
+## Installation
+
+### Via Package Manager
+
+Archlinux ([AUR](https://aur.archlinux.org/packages/nfc-staticnested-git))
+
+```
+yay -S nfc-staticnested-git
+```
+
+*If you have packaged for other distributions, feel free to add them here.*
+
+### Via Pre-built Binaries
+
+The [release](https://github.com/Redbeanw44602/nfc-staticnested/releases) page provides pre-built binaries for Linux / MacOSX / Windows, covering the latest commits.
+
+*Linux pre-built executables require glibc >= 2.30.*
+
+### Via Self-built
+
+To build this project by yourself, you need:
+
+ - [Xmake](https://xmake.io/guide/quick-start.html)
+ - Compiler that supports C++23
+   - `GCC >= 15` or `Clang >= 21` are recommended.
+   - Clang 20 is not supported: https://github.com/llvm/llvm-project/issues/133132
+   - Apple Clang is the worst compiler and is therefore unsupported.
+   - MSVC cannot be used because: https://github.com/nfc-tools/libnfc/pull/734
+
+Once you have everything ready:
+
+```
+xmake
+```
+
+Good luck!
+
 ## Usage
 
 The default mode assumes the tag type is 1K and does not save anything, only print the keychain to stdout.

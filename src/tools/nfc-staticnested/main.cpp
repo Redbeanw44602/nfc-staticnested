@@ -51,7 +51,8 @@ auto load_args(int argc, char* argv[]) {
         .scan<'X', std::uint64_t>()
         .help("Add a key to the default key test list.");
     program.add_argument("--target-sector")
-        .help("Specify the target sector; the dump function may fail.");
+        .help("Specify the target sector; the dump function may fail.")
+        .scan<'i', std::uint8_t>();
     program.add_argument("--target-key-type")
         .choices("a", "b")
         .help("Specify the target key type.");

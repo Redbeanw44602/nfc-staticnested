@@ -109,7 +109,7 @@ std::uint64_t MifareClassicDumper::test_key_for_block(
         }
     }
     throw std::runtime_error(
-        std::format("Can't authenticate block {}!", block)
+        std::format("Can't authenticate block {} with any key!", block)
     );
 }
 

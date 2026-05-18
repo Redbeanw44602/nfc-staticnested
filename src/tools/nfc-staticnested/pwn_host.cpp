@@ -195,7 +195,7 @@ bool PwnHost::check_fm11rf08s_backdoor() {
 }
 
 void PwnHost::perform(std::uint8_t target_sector, MifareKey target_key_type) {
-    std::println("Attacking sector {}...", target_sector);
+    std::println("Attacking sector {} key {}...", target_sector, target_key_type == MifareKey::A ? "A" : "B");
     auto result = static_nested::execute(
         m_initiator,
         m_card,
